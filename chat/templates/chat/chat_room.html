@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat between {{ sender.username }} and {{ receiver.username }}</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="{% static "deps/css/style.css" %}">
+</head>
+<body>
+<h1>Чат между {{ sender.username }} и {{ receiver.username }}</h1>
+<div class="window">
+  <aside class="conv-list-view">
+    <header class="conv-list-view__header">
+      <div class="cf">
+        <ul class="close-button-list">
+          <li></li><li></li><li></li>
+        </ul>
+      </div>
+    </header>
+  </aside>
+  <section class="chat-view">
+    <header class="chat-view__header">
+      <div class="cf">
+        <div class="status">
+          <i class="status__indicator--online"></i>
+          <div class="meta">
+            <div class="meta__name">{{ receiver.username }}</div>
+            <div class="meta__sub--light"></div>
+          </div>
+        </div>
+        <ul class="function-list">
+          <li class="icon-cloud"></li>
+          <li class="icon-clock"></li>
+          <li class="icon-dots"></li>
+        </ul>
+      </div>
+    </header>
+    <section class="message-view">
+      <div id="messages">
+        {% for message in messages %}
+            <div class="message {% if message.sender == sender %}message--send{% else %}message--receive{% endif %}">
+                <figure class="message__avatar">
+                    {% if message.sender.image %}
+                        <img src="{{ message.sender.image.url }}">
+                    {% else %}
+                        <!-- Здесь можно использовать заглушку или другое изображение по умолчанию -->
+                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png">
+                    {% endif %}
+                </figure>
+                <div class="message__bubble {% if message.sender == sender %}message__bubble--send{% endif %}">
+                    {{ message.content }}
+                </div>
+            </div>
+        {% endfor %}
+
+      </div>
+    </section>
+    <footer class="chat-view__input">
+      <form action="{% url 'send_message' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="sender_id" value="{{ sender.id }}">
+        <input type="hidden" name="receiver_id" value="{{ receiver.id }}">
+        <input type="text" name="content" placeholder="Type your message here...">
+        <input type="submit" value="Send">
+      </form>
+    </footer>
+  </section>
+</div>
+<footer class="credit">
+  <!-- Кредиты -->
+</footer>
+</body>
+</html>
+{% endblock %}

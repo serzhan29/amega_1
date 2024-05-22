@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% load static %}
+{% load carts_tags %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static "deps/css/my_css.css" %}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <style>
+        .payInput2 {
+            padding: 10px;
+            width: 300px;
+        }
+    </style>
+<div class=" bg-white p-4 mb-4 mx-2 rounded custom-shadow">
+    <div class="container">
+        <h3 class="text-center mb-4">Выбранные товары</h3>
+        <div class="container" id="cart-items-container">
+            <!-- Разметка корзины -->
+            {% user_carts request as carts %}
+
+            {% include "carts/includes/included_cart.html" %}
+            <!-- Закончилась разметка корзины -->
+        </div>
+    </div>
+    <!-- Детали заказа -->
+    <div class="container">
+        <h3 class="text-center">Детали заказа</h3>
+        <div class="card mb-3">
+            <div class="card-body">
+                <form action="{% url "orders:create_order" %}" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label">Имя*:</label>
+                            <input type="text" class="form-control" id="id_first_name"
+                                value="{% if form.first_name.value %}{{ form.first_name.value }}{% endif %}"
+                                name="first_name" required>
+                            {% if form.first_name.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show">{{form.first_name.errors}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label">Фамилия*:</label>
+                            <input type="text" class="form-control" id="id_last_name" name="last_name"
+                            value="{% if form.last_name.value %}{{ form.last_name.value }}{% endif %}"
+                            required>
+                            {% if form.last_name.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show">{{form.last_name.errors}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_phone_number" class="form-label">Номер телефона*:</label>
+                            <input type="text" class="form-control" id="id_phone_number" name="phone_number"
+                                value="{% if form.phone_number.value %}{{ form.phone_number.value }}{% endif %}"
+                                placeholder="В формате: +7 777 777 77 77"
+                                required>
+                            {% if form.phone_number.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show">{{form.phone_number.errors}}</div>
+                            {% endif %}
+                        </div>
+                        <hr>
+                        <div class="col-md-12 mb-3">
+                            <label for="delivery" class="form-label">Способ доставки: </label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="requires_delivery"
+                                    id="id_requires_delivery" value="1" checked>
+                                <label class="form-check-label" for="id_requires_delivery">Нужна
+                                    доставка</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="requires_delivery"
+                                    id="id_requires_delivery" value="0">
+                                <label class="form-check-label" for="id_requires_delivery">Самовывоз</label>
+                            </div>
+                        </div>
+                        <div class="mb-3" id="deliveryAddressField">
+                            <label for="id_delivery_address" class="form-label">Адрес
+                                доставки*:</label>
+                            <textarea class="form-control" id="id_delivery_address"
+                                value="{% if form.delivery_address.value %}{{ form.delivery_address.value }}{% endif %}"
+                                name="delivery_address" rows="2"></textarea>
+                            {% if form.delivery_address.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show">{{form.delivery_address.errors}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Способ оплаты: </label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="payment_on_get"
+                                    id="id_payment_on_get" value="0" checked>
+                                <label class="form-check-label" for="id_payment_on_get"><button class="id_payment_on_get" onclick="showPaymentWindow(event)">Оплатить картой</button></label>
+
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="payment_on_get"
+                                    id="id_payment_on_get" value="1">
+                                <label class="form-check-label" for="id_payment_on_get">Наличными/или
+                                    при плучении</label>
+                                {% if form.payment_on_get.errors %}
+                                    <div class="alert alert-danger alert-dismissible fade show">{{form.payment_on_get.errors}}</div>
+                                {% endif %}
+
+                                                </div>
+                                                <div class="payment">
+                                                    <br><br><br>
+
+                                                    <input type="text" placeholder="NAME SURNAME" class="payInput" oninput="restrictInputToUpperCaseLatin(this)" >
+                                                    <h1 class="payTitle">Реквезиты карты</h1>
+                                                    <div class="cardIcons">
+                                                        <img src="{% static "deps/images/kaspi_logo.png" %}" alt="kaspi" width="50" ,  class="cardIcon">
+                                                        <img src="{% static "deps/images/visa.png" %}" width="40" alt="visa" class="cardIcon">
+
+                                                    </div>
+                                                     <input class="payInput2" placeholder="1234 1234 1234 1234" oninput="formatCardNumber(this)" maxlength="19">
+                                                    <div class="cardInfo">
+                                                            <input type="text" placeholder="MM/YY" class="payInput sm" oninput="formatExpiryDate(this)" maxlength="5">
+                                                            <input type="text" placeholder="CVV" class="payInput sm" oninput="formatCVV(this)" maxlength="3">
+                                                    </div>
+                                                            <button class="payButton" onclick="closePaymentWindow()">Оплатить!</button>
+                                                            <span class="close" onclick="closePaymentWindow()">X</span>
+                                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form onsubmit="event.preventDefault(); return false;">
+                        {% if product.quantity < 1 %}
+                            <h6 class="card-title" style="color: red;">Товара в наличии нету</h6>
+                            <button type="button" class="btn btn-secondary">Сообщить о товаре</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-dark">Оформить заказ</button>
+                        {% endif %}
+                    </form>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function handlePaymentOptionChange(option) {
+        if (option === 'card') {
+            document.querySelector('.payment').style.display = 'block';
+        } else {
+            document.querySelector('.payment').style.display = 'none';
+        }
+    }
+
+    function handlePaymentSuccess() {
+        const orderId = YOUR_ORDER_ID; // Замените на ID вашего заказа
+        const csrfToken = '{{ csrf_token }}'; // Получаем CSRF-токен из шаблона Django
+
+        fetch('/update_payment_status/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                order_id: orderId,
+                is_paid: true // Здесь устанавливаем, что заказ оплачен
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Обработка успешного обновления статуса оплаты
+                alert('Оплата успешно зафиксирована');
+            } else {
+                // Обработка ошибки
+                alert('Произошла ошибка при обновлении статуса оплаты');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
+    <script>
+        function showPaymentWindow(event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение кнопки (например, для submit)
+            event.stopPropagation(); // Предотвращаем срабатывание события на родительских элементах
+            var paymentWindow = document.querySelector('.payment');
+            paymentWindow.style.display = 'flex';
+        }
+
+        function closePaymentWindow() {
+            var paymentWindow = document.querySelector('.payment');
+            paymentWindow.style.display = 'none';
+        }
+    </script>
+    <script>
+        function formatCardNumber(input) {
+            // Удаляем все нецифровые символы
+            let cardNumber = input.value.replace(/\D/g, '');
+
+            // Добавляем пробелы каждые 4 цифры
+            cardNumber = cardNumber.replace(/(\d{4}(?!$))/g, '$1 ');
+
+            // Обновляем значение в поле ввода
+            input.value = cardNumber;
+        }
+                function formatExpiryDate(input) {
+            // Удаляем все нецифровые символы
+            let expiryDate = input.value.replace(/\D/g, '  ');
+
+            // Добавляем пробелы после первых 2 цифр
+            if (expiryDate.length > 2) {
+                expiryDate = expiryDate.slice(0, 2) + '/' + expiryDate.slice(2);
+            }
+
+            // Обновляем значение в поле ввода
+            input.value = expiryDate;
+        }
+
+        function formatCVV(input) {
+            // Ограничиваем ввод максимум 3 цифрами
+            input.value = input.value.replace(/\D/g, '').slice(0, 3);
+        }
+                function restrictInputToUpperCaseLatin(input) {
+            // Заменяем все символы, кроме латинских букв и пробелов, и переводим в верхний регистр
+            input.value = input.value.replace(/[^A-Za-z ]/g, '').toUpperCase();
+        }
+    </script>
+{% endblock  %}

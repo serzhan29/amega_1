@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Все категорий</title>
+    <link rel="stylesheet" href="{% static "deps/css/category.css" %}">
+
+</head>
+<body>
+    <div class="cards-container">
+        {% for category in categories %}
+        <div class="card">
+            <img src="{{ category.image.url }}" alt="{{ category.name }}">
+            <div class="card-content">
+                <a href="{{ category.slug }}">{{ category.name }}</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+{% endblock %}

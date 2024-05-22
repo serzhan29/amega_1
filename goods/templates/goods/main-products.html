@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Products</title>
+</head>
+<body>
+    <h1>Products in {{ category.name }}</h1>
+    {{ category.slug }}
+    <p>Display products related to the main category here...</p>
+        {{ category.products.name }}
+        {{ products.image }}
+
+{% for product in goods %}
+        <!-- Карта товара -->
+        <div class="col-lg-4 col-md-6 p-4">
+            <div class="card border-primary rounded custom-shadow">
+                {% if product.image %}
+                    <a href="{% url "catalog:product" product.slug %}" ><img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" width="600" height="300"></a>
+                {% else %}
+                    <img src="{% static "deps/images/Not found image.png" %}" class="card-img-top" alt="...">
+                {% endif %}
+                <div class="card-body">
+                    <a href="{% url "catalog:product" product.slug %}">
+                        <p class="card-title">
+                            {% autoescape off %}
+                                {% if product.headline %}
+                                {{product.headline}}
+                                {% else %}
+                                {{ product.name }}
+                                {% endif %}
+                            {% endautoescape %}
+                        </p>
+                    </a>
+                    <p class="card-text">
+                        {% autoescape off %}
+                            {% if product.bodyline %}
+                            {{product.bodyline|truncatechars:100}}
+                            {% else %}
+                            {{ product.description|truncatechars:35 }}
+                            {% endif %}
+                        {% endautoescape %}
+                    </p>
+                    <p class="product_id">Количество товара: {{ product.quantity }}</p>
+                    <div class="d-flex justify-content-between">
+
+                        {% if product.quantity > 0 %}
+                            {% if product.discount %}
+                                <p><s>{{ product.price }}</s> ₸</p>
+                                <p><strong>{{ product.sell_price }} ₸</strong></p>
+                                <span class="badge bg-warning text-dark">Скидка {{ product.discount }} %</span>
+                            {% else %}
+                                <p><strong>{{ product.price }} ₸</strong></p>
+                            {% endif %}
+
+                            <a href="{% url "cart:cart_add" %}" class="btn add-to-cart"
+                               data-product-id="{{ product.id }}">
+                                {% csrf_token %}
+                                <img class="mx-1" src="{% static "deps/icons/cart-plus.svg" %}" alt="Catalog Icon"
+                                     width="32" height="32">
+                            </a>
+                        {% else %}
+                            {% if product.discount %}
+                                <p><s>{{ product.price }}</s> ₸</p>
+                                <p><strong>{{ product.sell_price }} ₸</strong></p>
+                                <span class="badge bg-warning text-dark">Скидка {{ product.discount }} %</span>
+                            {% else %}
+                                <p><strong>{{ product.price }} ₸</strong></p>
+                            {% endif %}
+                            <p>Товара нет в наличии</p>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+</body>
+</html>

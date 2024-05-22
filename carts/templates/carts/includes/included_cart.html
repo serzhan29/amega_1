@@ -1,0 +1,152 @@
+{% load static %}
+<style>
+
+    .dropdown-toggle::after {
+      content: none;
+    }
+
+    .custom-shadow {
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .product_id {
+      color: blue; /* Изменим цвет на синий */
+      font-size: 18px; /* Увеличим размер шрифта */
+    }
+
+    .badge.bg-warning.text-dark {
+      position: absolute;
+      top: 20px; /* Немного сдвинем вниз относительно верхнего края */
+      right: 10px; /* Немного сдвинем влево относительно правого края */
+      z-index: 1;
+      padding: 8px 12px; /* Немного увеличим отступы */
+      border-radius: 5px; /* Увеличим радиус закругления углов */
+      font-size: 1.2rem; /* Увеличим размер шрифта */
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .badge-banner {
+      top: 120%; /* Переместим немного ниже относительно родительского элемента */
+      border-radius: 20px; /* Увеличим радиус закругления углов */
+      font-size: 1rem; /* Увеличим размер шрифта */
+    }
+
+    /* Styles for images in product cards */
+    .card-img-top {
+      width: 100%;
+      height: auto;
+      object-fit: contain; /* Заменим cover на contain для сохранения пропорций */
+    }
+
+    /* Styles for product cards */
+    .card {
+      height: auto; /* Изменим высоту на auto, чтобы контент внутри карточек определял высоту */
+      width: 100%;
+      margin-bottom: 20px;
+      border: 2px solid #4CAF50; /* Изменим цвет границы на зеленый */
+      border-radius: 15px; /* Увеличим радиус закругления углов */
+      overflow: hidden;
+      transition: transform 0.3s; /* Добавим плавный переход при наведении */
+    }
+
+
+
+    /* Media query for devices with a maximum width of 767 pixels (mobile phones, etc.) */
+    @media (max-width: 767px) {
+      .card-img-top {
+        height: 100%;
+      }
+
+      .card {
+        /* Например, уменьшим отступы или размер шрифта для мобильных устройств */
+        margin-bottom: 10px;
+      }
+    }
+    /* Мобильные телефоны */
+    @media (max-width: 767px) {
+      .badge.bg-warning.text-dark {
+        top: 5px;
+        right: 5px;
+        padding: 0px 1px;
+        font-size: 1.2rem; /* Adjusted font size for better visibility */
+      }
+
+      .badge-banner {
+        top: 100%;
+        font-size: 1rem; /* Adjusted font size for better visibility */
+      }
+
+      .card {
+        margin-bottom: 10px;
+        border: 3px solid #4CAF50; /* Increased border size for better visibility */
+      }
+
+      .product_id {
+        font-size: 16px;
+      }
+    }
+
+</style>
+<div class="card mb-3 text-bg-light shadow-lg">
+    {% for cart in carts %}
+        <div class="card-header">
+            <h5 class="card-title">{{ cart.product.name }}</h5>
+            <div class="quantity-info">
+                {% if cart.product.quantity < 1 %}
+                    <p class="out-of-stock">Товара в наличии нету</p>
+                {% else %}
+                    <p class="available-quantity">В наличии: {{ cart.product.quantity }} шт</p>
+                {% endif %}
+            </div>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <div class="row text-center">
+                    <div class="col p-0">
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-dark btn-sm decrement"
+                                    data-cart-id="{{ cart.id }}"
+                                    data-cart-change-url="{% url "cart:cart_change" %}">
+                                    {% csrf_token %}
+                                    -
+                                </button>
+                            </span>
+                            <input type="text" class="form-control number" value="{{ cart.quantity }}"
+                                readonly>
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-dark btn-sm increment"
+                                    data-cart-id="{{ cart.id }}"
+                                    data-cart-change-url="{% url "cart:cart_change" %}">
+                                    {% csrf_token %}
+                                    +
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col p-0">
+                        <p>x {{ cart.product.sell_price }} = </p>
+                    </div>
+                    <div class="col p-0"><strong> {{cart.products_price}} ₸</strong></div>
+                    <div class="col p-0">
+                        <a href="{% url "cart:cart_remove" %}" class="remove-from-cart"
+                        data-cart-id="{{ cart.id }}">
+                            {% csrf_token %}
+                            <img class="mx-1" src="{% static "deps/icons/trash3-fill.svg" %}" alt="Catalog Icon"
+                                 style="width: 20px; height: 20px;">
+                        </a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    {% endfor %}
+</div>
+
+<p class="float-left">Итого <strong>{{ carts.total_quantity }}</strong> товар(а) на сумму</p>
+<h4 class="float-left"><strong>{{ carts.total_price }} ₸</strong></h4>
+
+{% if carts and not orders%}
+<a class="btn btn-dark" href="{% url "orders:create_order" %}">
+    Оформить заказ
+</a>
+{% endif %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block css %}
+{% endblock %}
+    <link rel="stylesheet" href="{% static "deps/css/my_css.css" %}">
+{% block modal_cart %}
+{% include "includes/cart_button.html" %}
+{% endblock  %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static "deps/css/my_css.css" %}">
+    <h1 class="mt-5 pt-5"><strong>{{ content }}</strong></h1>
+
+    {% if request.GET.q %}
+        <h3 class="mt-4">Результаты поиска по запросу {{ request.GET.q }}</h3>
+        {% if not goods_2 %}
+            <link rel="stylesheet" href="{% static "deps/css/my_footer_css.css" %}">
+            <h2 class="mt-4">По запросу ничего не найдено</h2>
+        {% endif %}
+    {% endif %}
+
+    <div class="row">
+        {% for product in goods_2 %}
+            <!-- Карта товара -->
+            <div class="col-lg-4 col-md-6 p-4">
+                <div class="card border-primary rounded custom-shadow">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" width="600" height="260">
+                    {% else %}
+                        <img src="{% static "deps/images/Not found image.png" %}" class="card-img-top" alt="...">
+                    {% endif %}
+            <div class="card-body">
+                <a href="{% url "catalog:product" product.slug %}">
+                    <p class="card-title">
+                        {% autoescape off %}
+                            {% if product.headline %}
+                                {{product.headline}}
+                            {% else %}
+                                {{ product.name }}
+                            {% endif %}
+                        {% endautoescape %}
+                    </p>
+                </a>
+                <p class="card-text">
+                    {% autoescape off %}
+                        {% if product.bodyline %}
+                            {{product.bodyline|truncatechars:100}}
+                        {% else %}
+                            {{ product.description|truncatechars:35 }}
+                        {% endif %}
+                    {% endautoescape %}
+                </p>
+                <p class="product_id">Кол-во товаров: {{ product.quantity }}</p>
+                <div class="d-flex justify-content-between">
+                    {% if product.quantity > 0 %}
+                        {% if product.discount %}
+                            <p><s>{{ product.price }}</s> ₸</p>
+                            <p><strong>{{ product.sell_price }} ₸</strong></p>
+                            <span class="badge bg-warning text-dark">Скидка {{ product.discount }} %</span>
+                        {% else %}
+                            <p><strong>{{ product.price }} ₸</strong></p>
+                        {% endif %}
+
+                        <a href="{% url "cart:cart_add" %}" class="btn add-to-cart" data-product-id="{{ product.id }}">
+                            {% csrf_token %}
+                            <img class="mx-1" src="{% static "deps/icons/cart-plus.svg" %}" alt="Catalog Icon" width="32" height="32">
+                        </a>
+                    {% else %}
+                        <p class="product_not_available mt-3" style="color : red">Товара нет в наличии</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center my-4">
+        <div class="custom-shadow d-flex">
+
+           <li class="page-item {% if not goods_2.has_previous %}disabled{% endif %}">
+                <a class="page-link" href="{% if goods_2.has_previous %}?page={{ goods_2.previous_page_number }}{% endif %}">Назад</a>
+            </li>
+
+            {% for page in goods_2.paginator.page_range %}
+                <li class="page-item {% if goods_2.number == page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                </li>
+            {% endfor %}
+
+            <li class="page-item {% if not goods_2.has_next %}disabled{% endif %}">
+                <a class="page-link" href="{% if goods_2.has_next %}?page={{ goods_2.next_page_number }}{% endif %}">Вперед</a>
+            </li>
+
+
+        </div>
+    </ul>
+</nav>
+
+
+{% endblock %}
